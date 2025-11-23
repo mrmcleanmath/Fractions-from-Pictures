@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Write the Fraction from the Picture – Jordan</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    :root {
+      --bg: #f5f5f5;
+      --card: #ffffff;
+      --text: #222222;
+      --accent: #1976d2;
+      --accent-soft: #e3f2fd;
+      --border: #cccccc;
+      --correct: #2e7d32;
+      --incorrect: #c62828;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+    }
+
+    .app {
+      max-width: 960px;
+      width: 100%;
+      margin: 24px;
+      background: var(--card);
+      border-radius: 16px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+      padding: 20px 24px 28px;
+    }
+
+    @media (min-width: 900px) {
+      .app {
+        padding: 24px 32px 32px;
+      }
+    }
+
+    h1 {
+      margin: 0 0 4px;
+      font-size: 1.8rem;
+    }
+
+    .subtitle {
+      margin: 0 0 16px;
+      font-size: 0.95rem;
+      color: #555;
+    }
+
+    .card {
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: #fafafa;
+      padding: 16px 18px;
+      margin-top: 8px;
+    }
+
+    .instructions {
+      font-size: 1rem;
+      margin-bottom: 12px;
+    }
+
+    .problem-layout {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 18px;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .visual-area {
+      flex: 1 1 260px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .fraction-bar {
+      display: grid;
+      border-radius: 10px;
+      overflow: hidden;
+      border: 2px solid var(--border);
+      min-width: 260px;
+      max-width: 420px;
+      height: 70px;
+      background: #ffffff;
+    }
+
+    .fraction-segment {
+      border-right: 1px solid var(--border);
+      background: #ffffff;
+      transition: background 0.15s;
+    }
+
+    .fraction-segment:last-child {
+      border-right: none;
+    }
+
+    .fraction-segment.shaded {
+      background: var(--accent-soft);
+    }
+
+    .answer-area {
+      flex: 0 0 200px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .fraction-input-wrapper {
+      display: inline-flex;
+      flex-direction: column;
+      align-items: stretch;
+      font-size: 1.4rem;
+    }
+
+    .frac-input {
+      width: 80px;
+      text-align: center;
+      font-size: 1.4rem;
+      padding: 4px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+    }
+
+    .fraction-bar-line {
+      border-top: 2px solid #000000;
+      margin: 2px 8px;
+    }
+
+    .button-row {
+      margin-top: 12px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: center;
+    }
+
+    button {
+      font-family: inherit;
+    }
+
+    .action-btn {
+      cursor: pointer;
+      border-radius: 999px;
+      border: none;
+      padding: 8px 16px;
+      font-size: 0.95rem;
+      background: var(--accent);
+      color: #fff;
+      font-weight: 500;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.16);
+      transition: background 0.15s, transform 0.05s;
+    }
+
+    .action-btn.secondary {
+      background: #e0e0e0;
+      color: #333;
+      box-shadow: none;
+    }
+
+    .action-btn:active {
+      transform: translateY(1px);
+    }
+
+    .feedback {
+      margin-top: 10px;
+      min-height: 24px;
+      font-size: 0.95rem;
+      text-align: center;
+    }
+
+    .feedback.correct {
+      color: var(--correct);
+      font-weight: 600;
+    }
+
+    .feedback.incorrect {
+      color: var(--incorrect);
+      font-weight: 600;
+    }
+
+    .footer {
+      margin-top: 18px;
+      font-size: 0.8rem;
+      color: #777;
+      text-align: right;
+    }
+
+    @media (max-width: 640px) {
+      .problem-layout {
+        flex-direction: column;
+        align-items: center;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <h1>Write the Fraction from the Picture</h1>
+    <p class="subtitle">
+      Look at the shaded parts and write the fraction: top box is the numerator, bottom box is the denominator.
+    </p>
+
+    <div class="card">
+      <div class="instructions">
+        Count how many parts are shaded and how many parts there are in total. Then write the fraction.
+      </div>
+
+      <div class="problem-layout">
+        <div class="visual-area">
+          <div id="fractionBar" class="fraction-bar">
+            <!-- segments inserted here -->
+          </div>
+        </div>
+
+        <div class="answer-area">
+          <div class="fraction-input-wrapper">
+            <input type="text" id="numeratorInput" class="frac-input" placeholder="top" />
+            <div class="fraction-bar-line"></div>
+            <input type="text" id="denominatorInput" class="frac-input" placeholder="bottom" />
+          </div>
+
+          <div class="button-row">
+            <button type="button" class="action-btn" id="checkBtn">Check</button>
+            <button type="button" class="action-btn secondary" id="newBtn">New problem</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="feedback" class="feedback"></div>
+    </div>
+
+    <div class="footer">
+      Mr. McLean Math – Fractions from Pictures (Write the Fraction)
+    </div>
+  </div>
+
+  <script>
+    // ----- Utilities -----
+    function sample(arr) {
+      return arr[Math.floor(Math.random() * arr.length)];
+    }
+
+    // ----- DOM -----
+    const fractionBarEl = document.getElementById("fractionBar");
+    const numeratorInput = document.getElementById("numeratorInput");
+    const denominatorInput = document.getElementById("denominatorInput");
+    const checkBtn = document.getElementById("checkBtn");
+    const newBtn = document.getElementById("newBtn");
+    const feedbackEl = document.getElementById("feedback");
+
+    // ----- State -----
+    let currentProblem = {
+      numerator: 1,
+      denominator: 2
+    };
+
+    const DENOMINATORS = [2, 3, 4, 5, 6, 7, 8, 9, 10];
+
+    // ----- Problem generation -----
+    function createFractionBar(den, num) {
+      fractionBarEl.innerHTML = "";
+      fractionBarEl.style.gridTemplateColumns = "repeat(" + den + ", 1fr)";
+
+      for (let i = 0; i < den; i++) {
+        const cell = document.createElement("div");
+        cell.className = "fraction-segment";
+        if (i < num) {
+          cell.classList.add("shaded");
+        }
+        fractionBarEl.appendChild(cell);
+      }
+    }
+
+    function generateNewProblem() {
+      const den = sample(DENOMINATORS);               // 2 to 10
+      const num = Math.floor(Math.random() * (den - 1)) + 1; // 1..den-1 (proper fraction)
+
+      currentProblem.numerator = num;
+      currentProblem.denominator = den;
+
+      createFractionBar(den, num);
+
+      numeratorInput.value = "";
+      denominatorInput.value = "";
+      feedbackEl.textContent = "";
+      feedbackEl.className = "feedback";
+
+      numeratorInput.focus();
+    }
+
+    // ----- Checking -----
+    function checkAnswer() {
+      const numStr = numeratorInput.value.trim();
+      const denStr = denominatorInput.value.trim();
+
+      const num = parseInt(numStr, 10);
+      const den = parseInt(denStr, 10);
+
+      if (isNaN(num) || isNaN(den)) {
+        feedbackEl.className = "feedback incorrect";
+        feedbackEl.textContent = "Please write whole numbers in both boxes.";
+        return;
+      }
+
+      if (den <= 0) {
+        feedbackEl.className = "feedback incorrect";
+        feedbackEl.textContent = "The denominator must be a positive number.";
+        return;
+      }
+
+      const correctNum = currentProblem.numerator;
+      const correctDen = currentProblem.denominator;
+
+      const isCorrect = (num === correctNum && den === correctDen);
+
+      if (isCorrect) {
+        feedbackEl.className = "feedback correct";
+        feedbackEl.textContent =
+          "Correct! " + correctNum + "/" + correctDen + " of the bar is shaded.";
+      } else {
+        feedbackEl.className = "feedback incorrect";
+        feedbackEl.textContent =
+          "Not quite. The correct fraction is " + correctNum + "/" + correctDen + ".";
+      }
+    }
+
+    // ----- Events -----
+    checkBtn.addEventListener("click", checkAnswer);
+    newBtn.addEventListener("click", generateNewProblem);
+
+    // Enter in numerator moves to denominator, Enter in denominator checks
+    numeratorInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        denominatorInput.focus();
+      }
+    });
+
+    denominatorInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        checkAnswer();
+      }
+    });
+
+    // ----- Init -----
+    function init() {
+      generateNewProblem();
+    }
+
+    init();
+  </script>
+</body>
+</html>
