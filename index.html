@@ -1,648 +1,858 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Write the Fraction from the Picture – Jordan</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <style>
-    :root {
-      --bg: #f5f5f5;
-      --card: #ffffff;
-      --text: #222222;
-      --accent: #1976d2;
-      --accent-soft: #e3f2fd;
-      --border: #777777; /* darkened for clearer outlines */
-      --correct: #2e7d32;
-      --incorrect: #c62828;
-    }
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Tables Trainer (1–20) – Mr. McLean Math</title>
+<style>
+  :root{
+    --bg:#0b0f14;
+    --card:#121821;
+    --ink:#e8eef6;
+    --muted:#9bb0c9;
+    --accent:#5cc8ff;
+    --good:#36d399;
+    --bad:#ff6b6b;
+    --warn:#ffd166;
+    --outline:#263041;
+    --shadow: 0 8px 24px rgba(0,0,0,.35);
+  }
+  body{
+    margin:0;
+    font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+    background:var(--bg);
+    color:var(--ink);
+  }
+  .wrap{max-width:1100px;margin:0 auto;padding:16px;}
+  header{display:flex;gap:12px;align-items:center;justify-content:space-between;margin-bottom:12px}
+  h1{font-size:clamp(18px,3.5vw,28px);margin:0;font-weight:700;letter-spacing:.3px}
+  .row{display:flex;flex-wrap:wrap;gap:12px}
+  .card{
+    background:var(--card);
+    border:1px solid var(--outline);
+    border-radius:14px;
+    box-shadow:var(--shadow);
+    padding:12px;
+  }
+  .section{flex:1 1 320px}
+  label{font-size:14px;color:var(--muted)}
+  select,input[type="number"],button{
+    background:#0e141b;
+    border:1px solid var(--outline);
+    color:var(--ink);
+    border-radius:10px;
+    padding:10px 12px;
+    font-size:14px;
+  }
+  button{cursor:pointer}
+  button.primary{background:var(--accent);border-color:transparent;color:#001019;font-weight:700}
+  button.ghost{background:transparent;border-color:var(--outline)}
+  button:disabled{opacity:.5;cursor:not-allowed}
+  .toggle{display:inline-flex;align-items:center;gap:8px}
+  .toggle input{accent-color:var(--accent)}
+  .pillbar{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+  .pill{
+    padding:6px 10px;
+    border:1px solid var(--outline);
+    border-radius:999px;
+    cursor:pointer;
+    font-size:13px;
+    background:#0e141b;
+  }
+  .grid20{
+    display:grid;
+    grid-template-columns:repeat(5,1fr);
+    gap:6px;
+    margin-top:8px;
+  }
+  .cell{
+    padding:8px 0;
+    text-align:center;
+    border:1px solid var(--outline);
+    border-radius:10px;
+    background:#0e141b;
+    cursor:pointer;
+    user-select:none
+  }
+  .cell[aria-pressed="true"]{background:#1d2735;outline:2px solid var(--accent)}
+  .controls{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+  .flex{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+  .right{margin-left:auto}
+  .badge{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    padding:6px 10px;
+    border-radius:999px;
+    border:1px solid var(--outline);
+    background:#0e141b;
+    color:var(--muted);
+    font-size:12px;
+  }
+  .status{display:flex;gap:8px;flex-wrap:wrap}
 
-    * {
-      box-sizing: border-box;
-    }
+  /* QUESTION AREA */
+  .question-panel{
+    margin-top:10px;
+  }
+  .question-cards{
+    display:flex;
+    align-items:center;
+    justify-content:flex-start;
+    gap:16px;
+  }
+  .factor-card{
+    width:180px;
+    min-height:150px;
+    border-radius:26px;
+    background:#181f2b;
+    border:2px solid #202a3a;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:space-between;
+    padding:16px 10px 14px 10px;
+    box-sizing:border-box;
+  }
+  .factor-number{
+    font-size:clamp(40px,5vw,60px);
+    font-weight:900;
+  }
+  .factor-blocks{
+    display:flex;
+    flex-wrap:wrap;
+    justify-content:center;
+    max-width:120px;
+    gap:4px;
+  }
+  .op-card,
+  .eq-card{
+    font-size:clamp(40px,5vw,60px);
+    font-weight:900;
+    min-width:40px;
+    text-align:center;
+  }
 
-    body {
-      margin: 0;
-      padding: 0;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      display: flex;
-      justify-content: center;
-      align-items: flex-start;
-      min-height: 100vh;
-    }
+  .answer-row{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin-top:12px;
+  }
+  .qinput{
+    min-width:180px;
+    font-size:28px;
+    padding:10px 12px;
+    font-weight:700;
+    text-align:center;
+  }
 
-    .app {
-      max-width: 960px;
-      width: 100%;
-      margin: 24px;
-      background: var(--card);
-      border-radius: 16px;
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
-      padding: 20px 24px 28px;
-    }
+  /* BLOCKS */
+  .block{
+    width:16px;
+    height:16px;
+    border-radius:4px;
+    background:var(--accent);
+  }
 
-    @media (min-width: 900px) {
-      .app {
-        padding: 24px 32px 32px;
-      }
-    }
+  /* ANSWER VISUALS */
+  .answer-visual{
+    margin-top:16px;
+  }
+  .answer-label{
+    font-size:22px;
+    font-weight:800;
+    margin-bottom:8px;
+  }
+  .group-container{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+  }
+  .group-card{
+    background:#181f2b;
+    border-radius:18px;
+    border:1px solid var(--outline);
+    padding:8px 10px;
+    box-sizing:border-box;
+  }
+  .group-blocks{
+    display:flex;
+    flex-wrap:wrap;
+    justify-content:center;
+    max-width:120px;
+    gap:4px;
+  }
 
-    h1 {
-      margin: 0 0 4px;
-      font-size: 1.8rem;
-    }
+  /* DIVISION VISUAL */
+  .division-visual{
+    margin-top:16px;
+    display:flex;
+    justify-content:flex-start;
+  }
+  canvas#divCanvas{
+    background:#0a0e13;
+    border-radius:50%;
+    border:1px solid var(--outline);
+  }
 
-    .subtitle {
-      margin: 0 0 16px;
-      font-size: 0.95rem;
-      color: #555;
-    }
+  .hint{
+    background:#0e141b;
+    border:1px dashed var(--outline);
+    border-radius:10px;
+    padding:10px;
+    color:var(--muted);
+    font-size:14px;
+    margin-top:8px;
+  }
 
-    .mode-toggle {
-      display: inline-flex;
-      gap: 8px;
-      margin-bottom: 12px;
-      flex-wrap: wrap;
-    }
+  footer{margin-top:24px;color:var(--muted);font-size:13px;text-align:center}
 
-    .mode-btn {
-      cursor: pointer;
-      border-radius: 999px;
-      border: 1px solid #bbbbbb;
-      padding: 6px 14px;
-      font-size: 0.9rem;
-      background: #f2f2f2;
-      color: #333;
-      font-weight: 500;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-    }
+  /* High contrast */
+  body.hc{
+    --bg:#000;
+    --card:#000;
+    --ink:#fff;
+    --muted:#fff;
+    --accent:#fff;
+    --outline:#fff;
+    --good:#0f0;
+    --bad:#f00;
+  }
 
-    .mode-btn.active {
-      background: var(--accent);
-      color: #ffffff;
-      border-color: var(--accent);
-    }
+  /* Timer flash */
+  @keyframes flashTimer {
+    0%   { background:#2b0b0b; color:#ffd5d5; }
+    50%  { background:#ffd166; color:#240000; }
+    100% { background:#2b0b0b; color:#ffd5d5; }
+  }
+  #timerBadge.timeup{
+    animation:flashTimer 1s ease-in-out 4;
+  }
 
-    .card {
-      border-radius: 12px;
-      border: 1px solid var(--border);
-      background: #fafafa;
-      padding: 16px 18px;
-      margin-top: 8px;
-    }
+  .popup{
+    position:fixed;
+    inset:auto auto 24px 50%;
+    transform:translateX(-50%);
+    padding:10px 14px;
+    border-radius:12px;
+    box-shadow:var(--shadow);
+    font-weight:700;
+    z-index:50;
+  }
+  .ok{background:var(--good);color:#002916}
+  .no{background:var(--bad);color:#240000}
 
-    .instructions {
-      font-size: 1rem;
-      margin-bottom: 12px;
-    }
+  .modal{
+    position:fixed;
+    inset:0;
+    display:none;
+    place-items:center;
+    background:rgba(0,0,0,.65);
+    z-index:100;
+  }
+  .modal.active{display:grid}
+  .sheet{
+    background:var(--card);
+    border:1px solid var(--outline);
+    border-radius:16px;
+    max-width:800px;
+    width:92vw;
+    padding:16px;
+    box-shadow:var(--shadow);
+  }
+  .sheet h2{margin:0 0 6px 0}
+  .sheet p{color:var(--muted);margin:.35rem 0}
+  .kbd{
+    border:1px solid var(--outline);
+    padding:2px 6px;
+    border-radius:6px;
+    background:#0e141b;
+  }
+  .sr-only{
+    position:absolute;
+    width:1px;
+    height:1px;
+    padding:0;
+    margin:-1px;
+    overflow:hidden;
+    clip:rect(0,0,0,0);
+    white-space:nowrap;
+    border:0;
+  }
 
-    .problem-layout {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 18px;
-      align-items: center;
-      justify-content: space-between;
+  @media (max-width:700px){
+    .question-cards{
+      flex-wrap:wrap;
+      justify-content:center;
     }
-
-    .visual-area {
-      flex: 1 1 260px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
+    .factor-card{
+      width:140px;
+      min-height:130px;
     }
-
-    .fraction-bar {
-      display: grid;
-      border-radius: 10px;
-      overflow: hidden;
-      border: 2px solid var(--border);
-      min-width: 260px;
-      max-width: 420px;
-      height: 70px;
-      background: #ffffff;
-    }
-
-    .fraction-segment {
-      border-right: 2px solid var(--border); /* thicker, clearer block outlines */
-      background: #ffffff;
-      transition: background 0.15s;
-    }
-
-    .fraction-segment:last-child {
-      border-right: none;
-    }
-
-    .fraction-segment.shaded {
-      background: var(--accent-soft);
-    }
-
-    .answer-area {
-      flex: 0 0 200px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .fraction-input-wrapper {
-      display: inline-flex;
-      flex-direction: column;
-      align-items: stretch;
-      font-size: 1.4rem;
-    }
-
-    .frac-input {
-      width: 80px;
-      text-align: center;
-      font-size: 1.4rem;
-      padding: 4px;
-      border-radius: 6px;
-      border: 1px solid var(--border);
-    }
-
-    .fraction-bar-line {
-      border-top: 2px solid #000000;
-      margin: 2px 8px;
-    }
-
-    .button-row {
-      margin-top: 12px;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      justify-content: center;
-    }
-
-    button {
-      font-family: inherit;
-    }
-
-    .action-btn {
-      cursor: pointer;
-      border-radius: 999px;
-      border: none;
-      padding: 8px 16px;
-      font-size: 0.95rem;
-      background: var(--accent);
-      color: #fff;
-      font-weight: 500;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.16);
-      transition: background 0.15s, transform 0.05s;
-    }
-
-    .action-btn.secondary {
-      background: #e0e0e0;
-      color: #333;
-      box-shadow: none;
-    }
-
-    .action-btn:active {
-      transform: translateY(1px);
-    }
-
-    .feedback {
-      margin-top: 10px;
-      min-height: 24px;
-      font-size: 0.95rem;
-      text-align: center;
-    }
-
-    .feedback.correct {
-      color: var(--correct);
-      font-weight: 600;
-    }
-
-    .feedback.incorrect {
-      color: var(--incorrect);
-      font-weight: 600;
-    }
-
-    /* Worksheet mode styles */
-    #worksheetCard {
-      margin-top: 12px;
-    }
-
-    .worksheet-instructions {
-      font-size: 1rem;
-      margin-bottom: 12px;
-    }
-
-    .worksheet-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-      gap: 14px;
-      margin-top: 8px;
-    }
-
-    .worksheet-problem {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-
-    .worksheet-header {
-      font-size: 0.9rem;
-      font-weight: 500;
-    }
-
-    .worksheet-bar-container {
-      display: flex;
-      justify-content: center;
-    }
-
-    .worksheet-bar {
-      height: 50px;
-      min-width: 220px;
-      max-width: 360px;
-    }
-
-    .worksheet-answer-line {
-      margin-top: 4px;
-      font-size: 0.95rem;
-    }
-
-    .frac-line {
-      display: inline-block;
-      min-width: 40px;
-      border-bottom: 2px solid #000;
-      text-align: center;
-    }
-
-    .worksheet-controls {
-      margin-top: 12px;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      justify-content: flex-start;
-    }
-
-    #answerKey {
-      margin-top: 10px;
-      font-size: 0.9rem;
-      display: none;
-    }
-
-    #answerKey h3 {
-      margin: 4px 0 6px;
-      font-size: 0.95rem;
-    }
-
-    #answerKey ol {
-      margin: 0 0 0 20px;
-      padding: 0;
-    }
-
-    .footer {
-      margin-top: 18px;
-      font-size: 0.8rem;
-      color: #777;
-      text-align: right;
-    }
-
-    @media (max-width: 640px) {
-      .problem-layout {
-        flex-direction: column;
-        align-items: center;
-      }
-
-      .worksheet-grid {
-        grid-template-columns: 1fr;
-      }
-    }
-  </style>
+  }
+</style>
 </head>
 <body>
-  <div class="app">
-    <h1>Write the Fraction from the Picture</h1>
-    <p class="subtitle">
-      Look at the shaded blocks and write the fraction: top box is the numerator, bottom box is the denominator.
-    </p>
-
-    <div class="mode-toggle">
-      <button type="button" class="mode-btn active" id="gameModeBtn">Game mode</button>
-      <button type="button" class="mode-btn" id="worksheetModeBtn">Worksheet mode</button>
+<div class="wrap" role="application" aria-label="Tables Trainer">
+  <header>
+    <h1>Tables Trainer (1–20)</h1>
+    <div class="controls">
+      <label class="toggle">
+        <input id="hcToggle" type="checkbox" aria-label="High contrast mode"> High Contrast
+      </label>
+      <label class="toggle">
+        <input id="soundToggle" type="checkbox" checked aria-label="Sound on or off"> Sound
+      </label>
+      <button id="howToBtn" class="ghost" aria-haspopup="dialog">How to Play</button>
     </div>
+  </header>
 
-    <!-- Game mode card -->
-    <div class="card" id="gameCard">
-      <div class="instructions" id="instructions">
-        What fraction of the blocks are shaded?
-      </div>
-
-      <div class="problem-layout">
-        <div class="visual-area">
-          <div id="fractionBar" class="fraction-bar">
-            <!-- segments inserted here -->
-          </div>
+  <div class="row">
+    <section class="card section">
+      <div class="controls">
+        <div>
+          <label>Mode</label><br>
+          <select id="mode">
+            <option value="mul">Multiplication (×)</option>
+            <option value="div">Division (÷)</option>
+            <option value="mix">Mixed (× + ÷)</option>
+          </select>
         </div>
-
-        <div class="answer-area">
-          <div class="fraction-input-wrapper">
-            <input type="text" id="numeratorInput" class="frac-input" placeholder="top" />
-            <div class="fraction-bar-line"></div>
-            <input type="text" id="denominatorInput" class="frac-input" placeholder="bottom" />
-          </div>
-
-          <div class="button-row">
-            <button type="button" class="action-btn" id="checkBtn">Check</button>
-            <button type="button" class="action-btn secondary" id="newBtn">New problem</button>
-          </div>
+        <div>
+          <label>Timer</label><br>
+          <select id="timerSel">
+            <option value="off" selected>Off</option>
+            <option value="30">30 s</option>
+            <option value="60">60 s</option>
+            <option value="90">90 s</option>
+            <option value="120">120 s</option>
+            <option value="180">180 s</option>
+          </select>
         </div>
       </div>
 
-      <div id="feedback" class="feedback"></div>
-    </div>
-
-    <!-- Worksheet mode card -->
-    <div class="card" id="worksheetCard" style="display: none;">
-      <div class="worksheet-instructions">
-        For each picture, write a fraction to show what fraction of the blocks are shaded with the given color.
+      <div class="pillbar" style="margin-top:8px">
+        <button class="pill" data-quick="1-5">Tables 1–5</button>
+        <button class="pill" data-quick="6-10">6–10</button>
+        <button class="pill" data-quick="11-15">11–15</button>
+        <button class="pill" data-quick="16-20">16–20</button>
+        <button class="pill" id="selectAll">Select All</button>
+        <button class="pill" id="clearAll">Clear</button>
       </div>
 
-      <div class="worksheet-controls">
-        <button type="button" class="action-btn secondary" id="newWorksheetBtn">New worksheet</button>
-        <button type="button" class="action-btn secondary" id="toggleAnswerKeyBtn">Show answer key</button>
-      </div>
+      <label style="display:block;margin-top:8px">Select tables (bases) 1–20</label>
+      <div id="grid" class="grid20"></div>
+    </section>
 
-      <div id="worksheetProblems" class="worksheet-grid">
-        <!-- worksheet problems inserted here -->
+    <section class="card section">
+      <label>Max factor (what to multiply / divide by)</label>
+      <div class="controls" style="margin-top:4px">
+        <div>
+          <label for="maxFactor">Up to</label><br>
+          <input id="maxFactor" type="number" min="1" max="12" value="10" style="width:90px">
+        </div>
       </div>
-
-      <div id="answerKey">
-        <h3>Answer key</h3>
-        <ol id="answerKeyList"></ol>
+      <div class="controls" style="margin-top:8px">
+        <label class="toggle">
+          <input id="instantToggle" type="checkbox"> Instant Check
+        </label>
+        <label class="toggle">
+          <input id="mirrorsToggle" type="checkbox" checked> Include mirror facts
+        </label>
       </div>
-    </div>
-
-    <div class="footer">
-      Mr. McLean Math – Fractions from Pictures (Write the Fraction)
-    </div>
+    </section>
   </div>
 
-  <script>
-    // ----- Utilities -----
-    function sample(arr) {
-      return arr[Math.floor(Math.random() * arr.length)];
-    }
+  <section class="card" id="live" style="margin-top:12px;display:none">
+    <div class="flex">
+      <div class="status">
+        <span class="badge" id="modeBadge">Mode: ×</span>
+        <span class="badge" id="timerBadge">⏱ Off</span>
+        <span class="badge" id="countBadge">Q –</span>
+        <span class="badge" id="scoreBadge">Score 0</span>
+        <span class="badge" id="streakBadge">Streak 0</span>
+        <span class="badge" id="accBadge">Accuracy –</span>
+      </div>
+      <div class="right">
+        <button id="nextBtn" class="ghost" disabled>Next</button>
+        <button id="howToBtn2" class="ghost">How to Play</button>
+      </div>
+    </div>
 
-    // ----- DOM -----
-    const fractionBarEl = document.getElementById("fractionBar");
-    const numeratorInput = document.getElementById("numeratorInput");
-    const denominatorInput = document.getElementById("denominatorInput");
-    const checkBtn = document.getElementById("checkBtn");
-    const newBtn = document.getElementById("newBtn");
-    const feedbackEl = document.getElementById("feedback");
-    const instructionsEl = document.getElementById("instructions");
+    <div class="question-panel">
+      <div class="question-cards">
+        <div class="factor-card">
+          <div id="numA" class="factor-number">–</div>
+          <div id="blocksA" class="factor-blocks"></div>
+        </div>
+        <div class="op-card"><span id="opSymbol">×</span></div>
+        <div class="factor-card">
+          <div id="numB" class="factor-number">–</div>
+          <div id="blocksB" class="factor-blocks"></div>
+        </div>
+        <div class="eq-card"><span id="eqText">= ?</span></div>
+      </div>
 
-    const gameModeBtn = document.getElementById("gameModeBtn");
-    const worksheetModeBtn = document.getElementById("worksheetModeBtn");
-    const gameCard = document.getElementById("gameCard");
-    const worksheetCard = document.getElementById("worksheetCard");
+      <div class="answer-row">
+        <label class="sr-only" for="answer">Answer</label>
+        <input id="answer" class="qinput" inputmode="numeric" autocomplete="off">
+        <button id="submitBtn" class="primary">Submit</button>
+      </div>
+    </div>
 
-    const worksheetProblemsEl = document.getElementById("worksheetProblems");
-    const newWorksheetBtn = document.getElementById("newWorksheetBtn");
-    const toggleAnswerKeyBtn = document.getElementById("toggleAnswerKeyBtn");
-    const answerKeyEl = document.getElementById("answerKey");
-    const answerKeyListEl = document.getElementById("answerKeyList");
+    <div id="answerVisual" class="answer-visual" style="display:none">
+      <div class="answer-label">Answer</div>
+      <div id="answerGroups" class="group-container"></div>
+    </div>
 
-    // ----- State -----
-    let currentProblem = {
-      numerator: 1,
-      denominator: 2,
-      colorName: "green",
-      colorValue: "#43a047"
+    <div id="divisionVisual" class="division-visual" style="display:none">
+      <canvas id="divCanvas" width="240" height="240"></canvas>
+    </div>
+
+    <div id="feedback" class="hint" style="display:none"></div>
+  </section>
+
+  <footer>Created by Mr. McLean Math</footer>
+</div>
+
+<!-- HOW TO MODAL -->
+<div id="howto" class="modal" role="dialog" aria-modal="true">
+  <div class="sheet">
+    <h2>How to Play</h2>
+    <p>Select a <b>mode</b>, choose which <b>tables</b> (1–20) you want, and a <b>max factor</b> (for example “up to 11” means 1–11). The game runs automatically.</p>
+    <p>Multiplication: each factor is shown inside a card with its blocks. After a correct answer, you’ll see that many groups, each containing the second factor as blocks.</p>
+    <p>Division: the problem uses a circle cut into slices equal to the divisor. After a correct answer, each slice is filled and labelled with the quotient.</p>
+    <p>Type the answer and press <span class="kbd">Enter</span> or click <b>Submit</b>. After feedback and visuals, press <span class="kbd">Enter</span> again or click <b>Next</b> for the next fact.</p>
+    <div class="flex" style="margin-top:8px">
+      <span class="right"></span>
+      <button id="closeHowTo" class="primary">Close</button>
+    </div>
+  </div>
+</div>
+
+<div id="popup" class="popup" style="display:none"></div>
+
+<script>
+const $ = s => document.querySelector(s);
+const $$ = s => Array.from(document.querySelectorAll(s));
+const rnd = (a,b)=>Math.floor(Math.random()*(b-a+1))+a;
+const clamp = (v,min,max)=>Math.max(min,Math.min(max,v));
+
+function beep(ok=true){
+  if(!$('#soundToggle').checked) return;
+  const ctx = new (window.AudioContext||window.webkitAudioContext)();
+  const o = ctx.createOscillator();
+  const g = ctx.createGain();
+  o.connect(g); g.connect(ctx.destination);
+  o.type = ok?'sine':'square';
+  o.frequency.value = ok?880:260;
+  g.gain.value = 0.0001;
+  const now = ctx.currentTime;
+  g.gain.exponentialRampToValueAtTime(0.2, now+.01);
+  g.gain.exponentialRampToValueAtTime(0.0001, now+.25);
+  o.start(); o.stop(now+.27);
+  o.onended = ()=>ctx.close();
+}
+function popup(msg, ok=true){
+  const el = $('#popup');
+  el.textContent = msg;
+  el.className = 'popup '+(ok?'ok':'no');
+  el.style.display = 'block';
+  setTimeout(()=>{ el.style.display='none'; }, 1100);
+}
+
+/* High contrast */
+$('#hcToggle').addEventListener('change',e=>{
+  document.body.classList.toggle('hc',e.target.checked);
+});
+
+/* How-to modal */
+const howto = $('#howto');
+$('#howToBtn').onclick = ()=>{howto.classList.add('active');};
+$('#howToBtn2').onclick = ()=>{howto.classList.add('active');};
+$('#closeHowTo').onclick = ()=>{howto.classList.remove('active');};
+howto.addEventListener('click',e=>{ if(e.target===howto) howto.classList.remove('active'); });
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape') howto.classList.remove('active');
+});
+
+/* TABLE GRID */
+const selectedTables = new Set();
+const grid = $('#grid');
+function buildGrid(){
+  grid.innerHTML='';
+  selectedTables.clear();
+  for(let i=1;i<=20;i++){
+    const btn=document.createElement('button');
+    btn.type='button';
+    btn.className='cell';
+    btn.textContent=i;
+    const on = i<=10;
+    if(on) selectedTables.add(i);
+    btn.setAttribute('aria-pressed',on?'true':'false');
+    btn.onclick=()=>{
+      const active = btn.getAttribute('aria-pressed')==='true';
+      btn.setAttribute('aria-pressed', active?'false':'true');
+      if(active) selectedTables.delete(i); else selectedTables.add(i);
+      autoRestart();
     };
+    grid.appendChild(btn);
+  }
+}
+buildGrid();
 
-    const DENOMINATORS = [2, 3, 4, 5, 6, 7, 8, 9, 10];
-
-    const COLORS = [
-      { name: "red",    value: "#e53935" },
-      { name: "blue",   value: "#1e88e5" },
-      { name: "green",  value: "#43a047" },
-      { name: "yellow", value: "#fdd835" },
-      { name: "orange", value: "#fb8c00" },
-      { name: "purple", value: "#8e24aa" },
-      { name: "pink",   value: "#d81b60" },
-      { name: "brown",  value: "#6d4c41" }
-    ];
-
-    const WORKSHEET_COUNT = 10;
-
-    // ----- Fraction bar creation (reusable) -----
-    function createFractionBar(element, den, num, colorValue) {
-      element.innerHTML = "";
-      element.style.gridTemplateColumns = "repeat(" + den + ", 1fr)";
-
-      for (let i = 0; i < den; i++) {
-        const cell = document.createElement("div");
-        cell.className = "fraction-segment";
-        if (i < num) {
-          cell.classList.add("shaded");
-          cell.style.background = colorValue;
-        } else {
-          cell.style.background = "#ffffff";
-        }
-        element.appendChild(cell);
-      }
+function setRange(a,b,add){
+  $$('.cell').forEach(btn=>{
+    const n=parseInt(btn.textContent,10);
+    if(n>=a && n<=b){
+      btn.setAttribute('aria-pressed',add?'true':'false');
+      if(add) selectedTables.add(n); else selectedTables.delete(n);
     }
+  });
+}
+$$('[data-quick]').forEach(p=>{
+  p.onclick=()=>{
+    const [a,b]=p.dataset.quick.split('-').map(Number);
+    setRange(a,b,true);
+    autoRestart();
+  };
+});
+$('#selectAll').onclick=()=>{setRange(1,20,true);autoRestart();};
+$('#clearAll').onclick=()=>{setRange(1,20,false);autoRestart();};
 
-    // ----- Game problem generation -----
-    function generateNewProblem() {
-      const den = sample(DENOMINATORS);               // 2 to 10
-      const num = Math.floor(Math.random() * (den - 1)) + 1; // 1..den-1 (proper fraction)
-      const color = sample(COLORS);
+/* VISUAL HELPERS */
+function makeBlocks(container,count){
+  container.innerHTML='';
+  const max = Math.min(count,40);
+  for(let i=0;i<max;i++){
+    const d=document.createElement('div');
+    d.className='block';
+    container.appendChild(d);
+  }
+}
+function makeGroupBlocks(container,count){
+  container.innerHTML='';
+  const max=Math.min(count,50);
+  for(let i=0;i<max;i++){
+    const d=document.createElement('div');
+    d.className='block';
+    container.appendChild(d);
+  }
+}
 
-      currentProblem.numerator = num;
-      currentProblem.denominator = den;
-      currentProblem.colorName = color.name;
-      currentProblem.colorValue = color.value;
+/* DIVISION CIRCLE */
+function drawCircle(divisor, filled, label){
+  const canvas = $('#divCanvas');
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  if(divisor<1) return;
+  const parts = Math.min(divisor,40);
+  const cx=canvas.width/2, cy=canvas.height/2;
+  const r=Math.min(cx,cy)-10;
 
-      createFractionBar(fractionBarEl, den, num, color.value);
+  ctx.save();
+  ctx.translate(cx,cy);
+  for(let i=0;i<parts;i++){
+    const start = 2*Math.PI*i/parts;
+    const end   = 2*Math.PI*(i+1)/parts;
+    ctx.beginPath();
+    ctx.moveTo(0,0);
+    ctx.arc(0,0,r,start,end,false);
+    ctx.closePath();
+    ctx.fillStyle = filled ? '#36d399' : '#1d2735';
+    ctx.fill();
+    ctx.strokeStyle='#0b0f14';
+    ctx.lineWidth=1;
+    ctx.stroke();
 
-      // Update instructions with color name
-      const colorText =
-        color.name.charAt(0).toUpperCase() + color.name.slice(1);
-      instructionsEl.textContent =
-        "What fraction of the blocks are shaded " + color.name + "?";
-
-      numeratorInput.value = "";
-      denominatorInput.value = "";
-      feedbackEl.textContent = "";
-      feedbackEl.className = "feedback";
-
-      numeratorInput.focus();
+    if(filled && label!=null){
+      const mid=(start+end)/2;
+      const tx=Math.cos(mid)*r*0.6;
+      const ty=Math.sin(mid)*r*0.6;
+      ctx.fillStyle='#001010';
+      ctx.font='14px system-ui';
+      ctx.textAlign='center';
+      ctx.textBaseline='middle';
+      ctx.fillText(label.toString(),tx,ty);
     }
+  }
+  ctx.restore();
+  ctx.beginPath();
+  ctx.strokeStyle='#e8eef6';
+  ctx.lineWidth=2;
+  ctx.arc(cx,cy,r,0,Math.PI*2);
+  ctx.stroke();
+}
 
-    // ----- Checking (game mode) -----
-    function checkAnswer() {
-      const numStr = numeratorInput.value.trim();
-      const denStr = denominatorInput.value.trim();
+/* SESSION ENGINE */
+let session=null;
+let timerId=null;
 
-      const num = parseInt(numStr, 10);
-      const den = parseInt(denStr, 10);
+function buildPool(mode){
+  const bases = Array.from(selectedTables).sort((a,b)=>a-b);
+  let maxF=parseInt($('#maxFactor').value,10);
+  if(!Number.isFinite(maxF) || maxF<1) maxF=1;
+  maxF=clamp(maxF,1,12);
+  $('#maxFactor').value=maxF;
 
-      if (isNaN(num) || isNaN(den)) {
-        feedbackEl.className = "feedback incorrect";
-        feedbackEl.textContent = "Please write whole numbers in both boxes.";
-        return;
-      }
-
-      if (den <= 0) {
-        feedbackEl.className = "feedback incorrect";
-        feedbackEl.textContent = "The denominator must be a positive number.";
-        return;
-      }
-
-      const correctNum = currentProblem.numerator;
-      const correctDen = currentProblem.denominator;
-      const colorName = currentProblem.colorName;
-
-      const isCorrect = (num === correctNum && den === correctDen);
-
-      if (isCorrect) {
-        feedbackEl.className = "feedback correct";
-        feedbackEl.textContent =
-          "Correct! " +
-          correctNum +
-          "/" +
-          correctDen +
-          " of the blocks are shaded " +
-          colorName +
-          ".";
-      } else {
-        feedbackEl.className = "feedback incorrect";
-        feedbackEl.textContent =
-          "Not quite. The correct fraction is " +
-          correctNum +
-          "/" +
-          correctDen +
-          " for the " +
-          colorName +
-          " blocks.";
-      }
+  if(bases.length===0) return [];
+  const mirrors = $('#mirrorsToggle').checked;
+  const mulFacts=[];
+  for(const a of bases){
+    for(let b=1;b<=maxF;b++){
+      mulFacts.push({a,b});
+      if(mirrors && a!==b) mulFacts.push({a:b,b:a});
     }
-
-    // ----- Worksheet generation -----
-    function generateWorksheet() {
-      worksheetProblemsEl.innerHTML = "";
-      answerKeyListEl.innerHTML = "";
-      answerKeyEl.style.display = "none";
-      toggleAnswerKeyBtn.textContent = "Show answer key";
-
-      for (let i = 0; i < WORKSHEET_COUNT; i++) {
-        const den = sample(DENOMINATORS);
-        const num = Math.floor(Math.random() * (den - 1)) + 1;
-        const color = sample(COLORS);
-        const colorName = color.name;
-        const colorValue = color.value;
-
-        const problemIndex = i + 1;
-
-        // Create problem container
-        const problemEl = document.createElement("div");
-        problemEl.className = "worksheet-problem";
-
-        const headerEl = document.createElement("div");
-        headerEl.className = "worksheet-header";
-        headerEl.textContent =
-          problemIndex +
-          ". What fraction of the blocks are shaded " +
-          colorName +
-          "?";
-        problemEl.appendChild(headerEl);
-
-        const barContainer = document.createElement("div");
-        barContainer.className = "worksheet-bar-container";
-
-        const barEl = document.createElement("div");
-        barEl.className = "fraction-bar worksheet-bar";
-        barContainer.appendChild(barEl);
-        problemEl.appendChild(barContainer);
-
-        createFractionBar(barEl, den, num, colorValue);
-
-        const answerLine = document.createElement("div");
-        answerLine.className = "worksheet-answer-line";
-        answerLine.innerHTML =
-          "Fraction: <span class=\"frac-line\">&nbsp;</span> / <span class=\"frac-line\">&nbsp;</span>";
-        problemEl.appendChild(answerLine);
-
-        worksheetProblemsEl.appendChild(problemEl);
-
-        // Add to answer key
-        const li = document.createElement("li");
-        li.textContent =
-          num + "/" + den + " (" + colorName + " blocks)";
-        answerKeyListEl.appendChild(li);
-      }
-    }
-
-    // ----- Mode switching -----
-    function setMode(mode) {
-      if (mode === "game") {
-        gameCard.style.display = "block";
-        worksheetCard.style.display = "none";
-        gameModeBtn.classList.add("active");
-        worksheetModeBtn.classList.remove("active");
-      } else {
-        gameCard.style.display = "none";
-        worksheetCard.style.display = "block";
-        gameModeBtn.classList.remove("active");
-        worksheetModeBtn.classList.add("active");
-      }
-    }
-
-    // ----- Events -----
-    checkBtn.addEventListener("click", checkAnswer);
-    newBtn.addEventListener("click", generateNewProblem);
-
-    // Enter in numerator moves to denominator, Enter in denominator checks
-    numeratorInput.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") {
-        denominatorInput.focus();
-      }
+  }
+  const pool=[];
+  if(mode==='mul' || mode==='mix'){
+    mulFacts.forEach(f=>{
+      pool.push({kind:'mul',a:f.a,b:f.b,ans:f.a*f.b});
     });
-
-    denominatorInput.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") {
-        checkAnswer();
-      }
+  }
+  if(mode==='div' || mode==='mix'){
+    mulFacts.forEach(f=>{
+      const a=f.a,b=f.b,c=a*b;
+      pool.push({kind:'div',dividend:c,divisor:a,ans:b});
+      pool.push({kind:'div',dividend:c,divisor:b,ans:a});
     });
+  }
+  return pool;
+}
 
-    gameModeBtn.addEventListener("click", () => {
-      setMode("game");
-    });
+function updateBadges(){
+  if(!session){
+    $('#scoreBadge').textContent='Score 0';
+    $('#streakBadge').textContent='Streak 0';
+    $('#accBadge').textContent='Accuracy –';
+    $('#countBadge').textContent='Q –';
+    return;
+  }
+  const acc = session.asked?Math.round(100*session.correct/session.asked):0;
+  $('#scoreBadge').textContent='Score '+session.score;
+  $('#streakBadge').textContent='Streak '+session.streak;
+  $('#accBadge').textContent='Accuracy '+acc+'%';
+  $('#countBadge').textContent='Q '+(session.asked+1);
+}
 
-    worksheetModeBtn.addEventListener("click", () => {
-      setMode("worksheet");
-    });
-
-    newWorksheetBtn.addEventListener("click", generateWorksheet);
-
-    toggleAnswerKeyBtn.addEventListener("click", () => {
-      const isVisible = answerKeyEl.style.display === "block";
-      if (isVisible) {
-        answerKeyEl.style.display = "none";
-        toggleAnswerKeyBtn.textContent = "Show answer key";
-      } else {
-        answerKeyEl.style.display = "block";
-        toggleAnswerKeyBtn.textContent = "Hide answer key";
-      }
-    });
-
-    // ----- Init -----
-    function init() {
-      generateNewProblem();
-      generateWorksheet();
+function startTimer(){
+  clearInterval(timerId);
+  if(!session) return;
+  const val=$('#timerSel').value;
+  session.timerMode=val;
+  $('#timerBadge').classList.remove('timeup');
+  if(val==='off'){
+    $('#timerBadge').textContent='⏱ Off';
+    return;
+  }
+  session.timeLeft=parseInt(val,10);
+  $('#timerBadge').textContent='⏱ '+session.timeLeft+'s';
+  timerId=setInterval(()=>{
+    if(!session){clearInterval(timerId);return;}
+    session.timeLeft--;
+    if(session.timeLeft<0) session.timeLeft=0;
+    $('#timerBadge').textContent='⏱ '+session.timeLeft+'s';
+    if(session.timeLeft<=0){
+      clearInterval(timerId);
+      $('#timerBadge').classList.add('timeup');
+      beep(false);
+      popup('Time is up!',false);
+      endSession();
     }
+  },1000);
+}
 
-    init();
-  </script>
+function showQuestion(item){
+  $('#answer').value='';
+  $('#answer').focus();
+  $('#answerVisual').style.display='none';
+  $('#divisionVisual').style.display='none';
+  $('#feedback').style.display='none';
+
+  if(item.kind==='mul'){
+    $('#modeBadge').textContent='Mode: ×';
+    $('#opSymbol').textContent='×';
+    $('#numA').textContent=item.a;
+    $('#numB').textContent=item.b;
+    $('#eqText').textContent='= ?';
+    makeBlocks($('#blocksA'),item.a);
+    makeBlocks($('#blocksB'),item.b);
+  }else{
+    $('#modeBadge').textContent='Mode: ÷';
+    $('#opSymbol').textContent='÷';
+    $('#numA').textContent=item.dividend;
+    $('#numB').textContent=item.divisor;
+    $('#eqText').textContent='= ?';
+    $('#blocksA').innerHTML='';
+    $('#blocksB').innerHTML='';
+    drawCircle(item.divisor,false,null);
+    $('#divisionVisual').style.display='block';
+  }
+}
+
+function nextQuestion(){
+  if(!session) return;
+  if(session.remaining.length===0){
+    popup('You completed all selected facts! New round starting.',true);
+    session.remaining = buildPool(session.mode).slice();
+  }
+  const idx = rnd(0,session.remaining.length-1);
+  const item = session.remaining[idx];
+  session.remaining.splice(idx,1);
+  session.current=item;
+  updateBadges();
+  showQuestion(item);
+  $('#submitBtn').disabled=false;
+  $('#nextBtn').disabled=true;
+  session.awaitNext=false;
+}
+
+function startSession(){
+  const mode=$('#mode').value;
+  const pool=buildPool(mode);
+  if(pool.length===0){
+    $('#live').style.display='none';
+    session=null;
+    return;
+  }
+  session={
+    mode,
+    remaining:pool.slice(),
+    asked:0,
+    correct:0,
+    score:0,
+    streak:0,
+    timerMode:$('#timerSel').value,
+    timeLeft:0,
+    current:null,
+    awaitNext:false
+  };
+  $('#live').style.display='block';
+  startTimer();
+  nextQuestion();
+}
+
+function endSession(){
+  session=null;
+  clearInterval(timerId);
+  $('#live').style.display='none';
+}
+
+function autoRestart(){
+  startSession();
+}
+
+/* ANSWER HANDLING */
+function showMulAnswer(a,b){
+  const container = $('#answerGroups');
+  container.innerHTML='';
+  const groups=a;
+  const perGroup=b;
+  const wrap=document.createElement('div');
+  wrap.className='group-container';
+  for(let g=0;g<groups;g++){
+    const card=document.createElement('div');
+    card.className='group-card';
+    const gb=document.createElement('div');
+    gb.className='group-blocks';
+    makeGroupBlocks(gb,perGroup);
+    card.appendChild(gb);
+    wrap.appendChild(card);
+  }
+  container.appendChild(wrap);
+  $('#answerVisual').style.display='block';
+}
+
+function showDivAnswer(divisor,quotient){
+  drawCircle(divisor,true,quotient);
+  $('#divisionVisual').style.display='block';
+}
+
+function submitAnswer(){
+  if(!session || !session.current || session.awaitNext) return;
+  const raw=$('#answer').value.trim();
+  if(raw==='') return;
+  if(!/^-?\d+$/.test(raw)){ popup('Numbers only',false); return; }
+  const val=Number(raw);
+  const ans=session.current.ans;
+  const ok = (val===ans);
+  session.asked++;
+
+  $('#eqText').textContent='= '+ans;
+
+  if(ok){
+    beep(true);
+    session.streak++;
+    session.score+=10+Math.min(session.streak*2,10);
+    $('#feedback').style.display='block';
+    $('#feedback').style.background='#102e21';
+    $('#feedback').style.color='#c6ffe1';
+    $('#feedback').textContent='Correct!';
+    if(session.current.kind==='mul'){
+      showMulAnswer(session.current.a,session.current.b);
+    }else{
+      showDivAnswer(session.current.divisor,session.current.ans);
+    }
+  }else{
+    beep(false);
+    session.streak=0;
+    $('#feedback').style.display='block';
+    $('#feedback').style.background='#2b0b0b';
+    $('#feedback').style.color='#ffd5d5';
+    $('#feedback').textContent='Incorrect. Correct answer: '+ans;
+  }
+  if(ok) session.correct++;
+  updateBadges();
+  session.awaitNext=true;
+  $('#submitBtn').disabled=true;
+  $('#nextBtn').disabled=false;
+}
+
+/* Instant check */
+$('#answer').addEventListener('input',()=>{
+  if(!$('#instantToggle').checked) return;
+  if(!session || !session.current || session.awaitNext) return;
+  const t=$('#answer').value.trim();
+  if(!/^-?\d+$/.test(t)) return;
+  if(Number(t)===session.current.ans) submitAnswer();
+});
+
+/* Controls */
+$('#submitBtn').onclick=submitAnswer;
+$('#nextBtn').onclick=()=>{
+  if(session && session.awaitNext){
+    session.awaitNext=false;
+    $('#nextBtn').disabled=true;
+    $('#submitBtn').disabled=false;
+    nextQuestion();
+  }
+};
+$('#answer').addEventListener('keydown',e=>{
+  if(e.key==='Enter'){
+    e.preventDefault();
+    if(!session) return;
+    if(session.awaitNext){
+      session.awaitNext=false;
+      $('#nextBtn').disabled=true;
+      $('#submitBtn').disabled=false;
+      nextQuestion();
+    }else{
+      submitAnswer();
+    }
+  }
+});
+
+/* Config changes auto restart */
+$('#mode').addEventListener('change',autoRestart);
+$('#maxFactor').addEventListener('change',autoRestart);
+$('#mirrorsToggle').addEventListener('change',autoRestart);
+$('#timerSel').addEventListener('change',()=>{
+  if(session) startTimer(); else startSession();
+});
+
+/* Start on load */
+window.addEventListener('load',startSession);
+</script>
 </body>
 </html>
