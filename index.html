@@ -11,7 +11,7 @@
       --text: #222222;
       --accent: #1976d2;
       --accent-soft: #e3f2fd;
-      --border: #cccccc;
+      --border: #777777; /* darkened for clearer outlines */
       --correct: #2e7d32;
       --incorrect: #c62828;
     }
@@ -59,6 +59,33 @@
       color: #555;
     }
 
+    .mode-toggle {
+      display: inline-flex;
+      gap: 8px;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+    }
+
+    .mode-btn {
+      cursor: pointer;
+      border-radius: 999px;
+      border: 1px solid #bbbbbb;
+      padding: 6px 14px;
+      font-size: 0.9rem;
+      background: #f2f2f2;
+      color: #333;
+      font-weight: 500;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .mode-btn.active {
+      background: var(--accent);
+      color: #ffffff;
+      border-color: var(--accent);
+    }
+
     .card {
       border-radius: 12px;
       border: 1px solid var(--border);
@@ -99,7 +126,7 @@
     }
 
     .fraction-segment {
-      border-right: 1px solid var(--border);
+      border-right: 2px solid var(--border); /* thicker, clearer block outlines */
       background: #ffffff;
       transition: background 0.15s;
     }
@@ -196,6 +223,81 @@
       font-weight: 600;
     }
 
+    /* Worksheet mode styles */
+    #worksheetCard {
+      margin-top: 12px;
+    }
+
+    .worksheet-instructions {
+      font-size: 1rem;
+      margin-bottom: 12px;
+    }
+
+    .worksheet-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 14px;
+      margin-top: 8px;
+    }
+
+    .worksheet-problem {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .worksheet-header {
+      font-size: 0.9rem;
+      font-weight: 500;
+    }
+
+    .worksheet-bar-container {
+      display: flex;
+      justify-content: center;
+    }
+
+    .worksheet-bar {
+      height: 50px;
+      min-width: 220px;
+      max-width: 360px;
+    }
+
+    .worksheet-answer-line {
+      margin-top: 4px;
+      font-size: 0.95rem;
+    }
+
+    .frac-line {
+      display: inline-block;
+      min-width: 40px;
+      border-bottom: 2px solid #000;
+      text-align: center;
+    }
+
+    .worksheet-controls {
+      margin-top: 12px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: flex-start;
+    }
+
+    #answerKey {
+      margin-top: 10px;
+      font-size: 0.9rem;
+      display: none;
+    }
+
+    #answerKey h3 {
+      margin: 4px 0 6px;
+      font-size: 0.95rem;
+    }
+
+    #answerKey ol {
+      margin: 0 0 0 20px;
+      padding: 0;
+    }
+
     .footer {
       margin-top: 18px;
       font-size: 0.8rem;
@@ -208,6 +310,10 @@
         flex-direction: column;
         align-items: center;
       }
+
+      .worksheet-grid {
+        grid-template-columns: 1fr;
+      }
     }
   </style>
 </head>
@@ -215,12 +321,18 @@
   <div class="app">
     <h1>Write the Fraction from the Picture</h1>
     <p class="subtitle">
-      Look at the shaded parts and write the fraction: top box is the numerator, bottom box is the denominator.
+      Look at the shaded blocks and write the fraction: top box is the numerator, bottom box is the denominator.
     </p>
 
-    <div class="card">
-      <div class="instructions">
-        Count how many parts are shaded and how many parts there are in total. Then write the fraction.
+    <div class="mode-toggle">
+      <button type="button" class="mode-btn active" id="gameModeBtn">Game mode</button>
+      <button type="button" class="mode-btn" id="worksheetModeBtn">Worksheet mode</button>
+    </div>
+
+    <!-- Game mode card -->
+    <div class="card" id="gameCard">
+      <div class="instructions" id="instructions">
+        What fraction of the blocks are shaded?
       </div>
 
       <div class="problem-layout">
@@ -247,6 +359,27 @@
       <div id="feedback" class="feedback"></div>
     </div>
 
+    <!-- Worksheet mode card -->
+    <div class="card" id="worksheetCard" style="display: none;">
+      <div class="worksheet-instructions">
+        For each picture, write a fraction to show what fraction of the blocks are shaded with the given color.
+      </div>
+
+      <div class="worksheet-controls">
+        <button type="button" class="action-btn secondary" id="newWorksheetBtn">New worksheet</button>
+        <button type="button" class="action-btn secondary" id="toggleAnswerKeyBtn">Show answer key</button>
+      </div>
+
+      <div id="worksheetProblems" class="worksheet-grid">
+        <!-- worksheet problems inserted here -->
+      </div>
+
+      <div id="answerKey">
+        <h3>Answer key</h3>
+        <ol id="answerKeyList"></ol>
+      </div>
+    </div>
+
     <div class="footer">
       Mr. McLean Math – Fractions from Pictures (Write the Fraction)
     </div>
@@ -265,38 +398,78 @@
     const checkBtn = document.getElementById("checkBtn");
     const newBtn = document.getElementById("newBtn");
     const feedbackEl = document.getElementById("feedback");
+    const instructionsEl = document.getElementById("instructions");
+
+    const gameModeBtn = document.getElementById("gameModeBtn");
+    const worksheetModeBtn = document.getElementById("worksheetModeBtn");
+    const gameCard = document.getElementById("gameCard");
+    const worksheetCard = document.getElementById("worksheetCard");
+
+    const worksheetProblemsEl = document.getElementById("worksheetProblems");
+    const newWorksheetBtn = document.getElementById("newWorksheetBtn");
+    const toggleAnswerKeyBtn = document.getElementById("toggleAnswerKeyBtn");
+    const answerKeyEl = document.getElementById("answerKey");
+    const answerKeyListEl = document.getElementById("answerKeyList");
 
     // ----- State -----
     let currentProblem = {
       numerator: 1,
-      denominator: 2
+      denominator: 2,
+      colorName: "green",
+      colorValue: "#43a047"
     };
 
     const DENOMINATORS = [2, 3, 4, 5, 6, 7, 8, 9, 10];
 
-    // ----- Problem generation -----
-    function createFractionBar(den, num) {
-      fractionBarEl.innerHTML = "";
-      fractionBarEl.style.gridTemplateColumns = "repeat(" + den + ", 1fr)";
+    const COLORS = [
+      { name: "red",    value: "#e53935" },
+      { name: "blue",   value: "#1e88e5" },
+      { name: "green",  value: "#43a047" },
+      { name: "yellow", value: "#fdd835" },
+      { name: "orange", value: "#fb8c00" },
+      { name: "purple", value: "#8e24aa" },
+      { name: "pink",   value: "#d81b60" },
+      { name: "brown",  value: "#6d4c41" }
+    ];
+
+    const WORKSHEET_COUNT = 10;
+
+    // ----- Fraction bar creation (reusable) -----
+    function createFractionBar(element, den, num, colorValue) {
+      element.innerHTML = "";
+      element.style.gridTemplateColumns = "repeat(" + den + ", 1fr)";
 
       for (let i = 0; i < den; i++) {
         const cell = document.createElement("div");
         cell.className = "fraction-segment";
         if (i < num) {
           cell.classList.add("shaded");
+          cell.style.background = colorValue;
+        } else {
+          cell.style.background = "#ffffff";
         }
-        fractionBarEl.appendChild(cell);
+        element.appendChild(cell);
       }
     }
 
+    // ----- Game problem generation -----
     function generateNewProblem() {
       const den = sample(DENOMINATORS);               // 2 to 10
       const num = Math.floor(Math.random() * (den - 1)) + 1; // 1..den-1 (proper fraction)
+      const color = sample(COLORS);
 
       currentProblem.numerator = num;
       currentProblem.denominator = den;
+      currentProblem.colorName = color.name;
+      currentProblem.colorValue = color.value;
 
-      createFractionBar(den, num);
+      createFractionBar(fractionBarEl, den, num, color.value);
+
+      // Update instructions with color name
+      const colorText =
+        color.name.charAt(0).toUpperCase() + color.name.slice(1);
+      instructionsEl.textContent =
+        "What fraction of the blocks are shaded " + color.name + "?";
 
       numeratorInput.value = "";
       denominatorInput.value = "";
@@ -306,7 +479,7 @@
       numeratorInput.focus();
     }
 
-    // ----- Checking -----
+    // ----- Checking (game mode) -----
     function checkAnswer() {
       const numStr = numeratorInput.value.trim();
       const denStr = denominatorInput.value.trim();
@@ -328,17 +501,100 @@
 
       const correctNum = currentProblem.numerator;
       const correctDen = currentProblem.denominator;
+      const colorName = currentProblem.colorName;
 
       const isCorrect = (num === correctNum && den === correctDen);
 
       if (isCorrect) {
         feedbackEl.className = "feedback correct";
         feedbackEl.textContent =
-          "Correct! " + correctNum + "/" + correctDen + " of the bar is shaded.";
+          "Correct! " +
+          correctNum +
+          "/" +
+          correctDen +
+          " of the blocks are shaded " +
+          colorName +
+          ".";
       } else {
         feedbackEl.className = "feedback incorrect";
         feedbackEl.textContent =
-          "Not quite. The correct fraction is " + correctNum + "/" + correctDen + ".";
+          "Not quite. The correct fraction is " +
+          correctNum +
+          "/" +
+          correctDen +
+          " for the " +
+          colorName +
+          " blocks.";
+      }
+    }
+
+    // ----- Worksheet generation -----
+    function generateWorksheet() {
+      worksheetProblemsEl.innerHTML = "";
+      answerKeyListEl.innerHTML = "";
+      answerKeyEl.style.display = "none";
+      toggleAnswerKeyBtn.textContent = "Show answer key";
+
+      for (let i = 0; i < WORKSHEET_COUNT; i++) {
+        const den = sample(DENOMINATORS);
+        const num = Math.floor(Math.random() * (den - 1)) + 1;
+        const color = sample(COLORS);
+        const colorName = color.name;
+        const colorValue = color.value;
+
+        const problemIndex = i + 1;
+
+        // Create problem container
+        const problemEl = document.createElement("div");
+        problemEl.className = "worksheet-problem";
+
+        const headerEl = document.createElement("div");
+        headerEl.className = "worksheet-header";
+        headerEl.textContent =
+          problemIndex +
+          ". What fraction of the blocks are shaded " +
+          colorName +
+          "?";
+        problemEl.appendChild(headerEl);
+
+        const barContainer = document.createElement("div");
+        barContainer.className = "worksheet-bar-container";
+
+        const barEl = document.createElement("div");
+        barEl.className = "fraction-bar worksheet-bar";
+        barContainer.appendChild(barEl);
+        problemEl.appendChild(barContainer);
+
+        createFractionBar(barEl, den, num, colorValue);
+
+        const answerLine = document.createElement("div");
+        answerLine.className = "worksheet-answer-line";
+        answerLine.innerHTML =
+          "Fraction: <span class=\"frac-line\">&nbsp;</span> / <span class=\"frac-line\">&nbsp;</span>";
+        problemEl.appendChild(answerLine);
+
+        worksheetProblemsEl.appendChild(problemEl);
+
+        // Add to answer key
+        const li = document.createElement("li");
+        li.textContent =
+          num + "/" + den + " (" + colorName + " blocks)";
+        answerKeyListEl.appendChild(li);
+      }
+    }
+
+    // ----- Mode switching -----
+    function setMode(mode) {
+      if (mode === "game") {
+        gameCard.style.display = "block";
+        worksheetCard.style.display = "none";
+        gameModeBtn.classList.add("active");
+        worksheetModeBtn.classList.remove("active");
+      } else {
+        gameCard.style.display = "none";
+        worksheetCard.style.display = "block";
+        gameModeBtn.classList.remove("active");
+        worksheetModeBtn.classList.add("active");
       }
     }
 
@@ -359,9 +615,31 @@
       }
     });
 
+    gameModeBtn.addEventListener("click", () => {
+      setMode("game");
+    });
+
+    worksheetModeBtn.addEventListener("click", () => {
+      setMode("worksheet");
+    });
+
+    newWorksheetBtn.addEventListener("click", generateWorksheet);
+
+    toggleAnswerKeyBtn.addEventListener("click", () => {
+      const isVisible = answerKeyEl.style.display === "block";
+      if (isVisible) {
+        answerKeyEl.style.display = "none";
+        toggleAnswerKeyBtn.textContent = "Show answer key";
+      } else {
+        answerKeyEl.style.display = "block";
+        toggleAnswerKeyBtn.textContent = "Hide answer key";
+      }
+    });
+
     // ----- Init -----
     function init() {
       generateNewProblem();
+      generateWorksheet();
     }
 
     init();
